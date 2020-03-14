@@ -1,20 +1,33 @@
-const { services, extraSteps } = require("./config");
+const { services, extraSteps, configPath } = require("./config");
 
-const generateActions = ({path, name, bind}) => {
-    return {
-        pull: `docker pull ${path}:latest`,
-        rmImg: `docker image rm ${path}:current`,
-        tag: `docker image tag ${path}:latest ${path}:current`,
-        stop: `docker container stop ${name}`,
-        rmContainer: `docker container rm ${name}`,
-        start: `docker run -d --restart=always --network=pulse --name=${name} -p ${bind} ${path}:current`,
+const generateActions = {
+    hub: ({path, name, bind}) => {
+        return [
+            `docker pull ${path}:latest`,
+            `docker container stop ${name}`,
+            `docker container rm ${name}`,
+            `docker image rm ${path}:current`,
+            `docker image tag ${path}:latest ${path}:current`,
+            `docker run -d --restart=always --network=pulse --name=${name} -p ${bind} ${path}:current`,
+        ];
+    },
+    local: ({ path, name, bind, df }) => {
+        return [
+            `docker build -f ${configPath}/${df} -t ${name}:latest ${path}`,
+            `docker container stop ${name}`,
+            `docker container rm ${name}`,
+            `docker image rm ${name}:current`,
+            `docker image tag ${name}:latest ${name}:current`,
+            `docker run -d --restart=always --network=pulse --name=${name} -p ${bind} ${name}:current`,
+        ];
     }
-}
+}; 
 
 const buildServiceActions = (name) => {
     const serviceInfo = services[name];
     if ( serviceInfo) {
-       return {...generateActions(serviceInfo), extra: extraSteps[name] || []};
+        const genFn = generateActions[serviceInfo.type || 'hub'];
+       return { actions: [...genFn(serviceInfo),...(extraSteps[name] || [])]};
     }
 }
 
