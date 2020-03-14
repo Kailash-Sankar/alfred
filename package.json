@@ -1,0 +1,22 @@
+{
+  "name": "alfred",
+  "version": "1.0.0",
+  "description": "CLI utility for dev tasks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Kailash-Sankar/alfred.git"
+  },
+  "author": "Kailash Sankar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kailash-Sankar/alfred/issues"
+  },
+  "homepage": "https://github.com/Kailash-Sankar/alfred#readme",
+  "dependencies": {
+    "commander": "^5.0.0"
+  }
+}
