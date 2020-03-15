@@ -28,9 +28,9 @@ const services = {
 
 // additional custom steps
 const extraSteps = {
-    app_server : [
-        'docker cp /tmp/muffins/ app_server:/app/config/',
-        'docker exec -it bash -c "export NODE_ENV=development; pm2 restart all --update-env"',
+    if_server : [
+        { cmd:`docker cp ${configPath}/default.yml if_server:/app/config/`, req: true },
+        { cmd: 'docker exec -it bash -c "export NODE_ENV=development; pm2 restart all --update-env"', req: true}
     ]
 }
 

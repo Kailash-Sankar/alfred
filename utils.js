@@ -6,9 +6,10 @@ const chalk = require('chalk');
 // shell dump
 const say = (str) => shell.echo(chalk.cyan('Alfred:') + ` ${str}`);
 
-const sayMore = (str, callback) => {
+const mockExec = (str, callback) => {
     say(str);
     if (callback) callback();
+    return { code : 0 };
 }
 
 // debug
@@ -16,17 +17,29 @@ const sayMore = (str, callback) => {
 
 const execServiceActions = ({ name, dryrun }) => {
     const serv = buildServiceActions(name);
-    let exec = dryrun ? sayMore : shell.exec;
+    let exec = dryrun ? mockExec : shell.exec;
 
-    if (serv.actions) {
+    if (serv && serv.actions) {
         say(chalk.blueBright(`Service configuration found for ${name}`));
 
-        serv.actions.forEach( (act) => {
-            exec(act);    
-        })
+        for (act of serv.actions) {
+            if ( exec(act.cmd).code !== 0 ) {
+                say(chalk.yellowBright(`${ act.req ? 'Essential' : 'Non-essential'} Step failed.`));
+                if (act.req) {
+                    say(chalk.yellowBright('Exiting...Please use dryrun to manually run and verify'));
+                    return;
+                }
+                say(chalk.blueBright("there's still hope, proceeding to next step"));
+            } 
+        }
 
         // extra steps if any
         if ( serv.callback ) serv.callback();
+
+        say(chalk.greenBright('Done...'));
+    }
+    else {
+        say(chalk.yellowBright(`No configuration found for ${name}`));
     }
 }
 
