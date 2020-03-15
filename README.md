@@ -10,6 +10,11 @@
 - steps can be optional, specify in config
 - messages are color coded
 
+## install
+
+     git clone <repo>
+     npm link
+
 ## usage
 
      // help
