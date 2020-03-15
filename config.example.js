@@ -30,7 +30,7 @@ const services = {
 const extraSteps = {
     if_server : [
         { cmd:`docker cp ${configPath}/default.yml if_server:/app/config/`, req: true },
-        { cmd: 'docker exec -it bash -c "export NODE_ENV=development; pm2 restart all --update-env"', req: true}
+        { cmd: 'docker exec -i bash -c "export NODE_ENV=development; pm2 restart all --update-env"', req: true}
     ]
 }
 
