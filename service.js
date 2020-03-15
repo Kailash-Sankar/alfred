@@ -42,4 +42,6 @@ const buildServiceActions = (name) => {
     }
 }
 
-module.exports = { buildServiceActions };
+const servicesList = () => Object.keys(services).join(', ');
+
+module.exports = { buildServiceActions, servicesList };
