@@ -6,9 +6,7 @@ const chalk = require('chalk');
 // shell dump
 const say = (str) => shell.echo(chalk.cyan('Alfred:') + ` ${str}`);
 
-const mockExec = (str, callback) => {
-    say(str);
-    if (callback) callback();
+const mockExec = () => {
     return { code : 0 };
 }
 
@@ -23,6 +21,7 @@ const execServiceActions = ({ name, dryrun }) => {
         say(chalk.blueBright(`Service configuration found for ${name}`));
 
         for (act of serv.actions) {
+            say(chalk.grey(`${act.cmd}`));
             if ( exec(act.cmd).code !== 0 ) {
                 say(chalk.yellowBright(`${ act.req ? 'Essential' : 'Non-essential'} Step failed.`));
                 if (act.req) {
