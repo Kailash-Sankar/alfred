@@ -8,7 +8,8 @@ const steps = {
     removeImage: (img) => `docker image rm ${img}:current`,
     tagImage: (img) => `docker image tag ${img}:latest ${img}:current`,
     build: (df, name, path) =>`docker build -f ${configPath}/${df} -t ${name}:latest ${path}`,
-    start: (name, bind, path) => `docker run -d --restart=always --network=pulse --name=${name} -p ${bind} ${path}:current`
+    start: (name, bind, path) => `docker run -d --restart=always --network=pulse --name=${name} -p ${bind} ${path}:current`,
+    syncConfig: (path) => `cp -uvR ${configPath} ${path}/build_config`,
 }
 
 const generateActions = {
@@ -24,6 +25,7 @@ const generateActions = {
     },
     local: ({ path, name, bind, df }) => {
         return [
+            { cmd: steps.syncConfig(path), req: false },
             { cmd: steps.build(df,name, path), req: true },
             { cmd: steps.stopContainer(name), req: false },
             { cmd: steps.removeContainer(name), req: false },
