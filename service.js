@@ -9,7 +9,7 @@ const steps = {
     tagImage: (img) => `docker image tag ${img}:latest ${img}:current`,
     build: (df, name, path) =>`docker build -f ${configPath}/${df} -t ${name}:latest ${path}`,
     start: (name, bind, path) => `docker run -d --restart=always --network=pulse --name=${name} -p ${bind} ${path}:current`,
-    syncConfig: (path) => `cp -uvR ${configPath} ${path}/build_config`,
+    syncConfig: (path) => `rsync -a ${configPath} ${path}`,
 }
 
 const generateActions = {
