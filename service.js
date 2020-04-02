@@ -1,5 +1,6 @@
-const { services, extraSteps, configPath } = require("./config");
+const { services, extraSteps, configPath, network } = require("./config");
 
+// TODO: cleanup
 
 const steps = {
     pull: (path) => `docker pull ${path}:latest`,
@@ -7,8 +8,14 @@ const steps = {
     removeContainer: (name) => `docker container rm ${name}`,
     removeImage: (img) => `docker image rm ${img}:current`,
     tagImage: (img) => `docker image tag ${img}:latest ${img}:current`,
-    build: (df, name, path) =>`docker build -f ${configPath}/${df} -t ${name}:latest ${path}`,
-    start: (name, bind, path) => `docker run -d --restart=always --network=pulse --name=${name} -p ${bind} ${path}:current`,
+    build: (df, name, path) => {
+        let dockerfile = '';
+        if (df != "default" ) {
+            dockerfile = `-f ${configPath}/${df}`;
+        }
+        return `docker build ${dockerfile} -t ${name}:latest ${path}`;
+    },
+    start: (name, bind, path) => `docker run -d --restart=always ${network} --name=${name} -p ${bind} ${path}:current`,
     syncConfig: (path) => `rsync -a ${configPath} ${path}`,
 }
 
@@ -27,6 +34,16 @@ const generateActions = {
         return [
             { cmd: steps.syncConfig(path), req: false },
             { cmd: steps.build(df,name, path), req: true },
+            { cmd: steps.stopContainer(name), req: false },
+            { cmd: steps.removeContainer(name), req: false },
+            { cmd: steps.removeImage(name), req: false },
+            { cmd: steps.tagImage(name), req: true },
+            { cmd: steps.start(name, bind, name), req: true }
+        ];
+    },
+    standard: ({  path, name, bind}) => {
+        return [
+            { cmd: steps.build('default', name, path), req: true },
             { cmd: steps.stopContainer(name), req: false },
             { cmd: steps.removeContainer(name), req: false },
             { cmd: steps.removeImage(name), req: false },
