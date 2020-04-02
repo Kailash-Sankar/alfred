@@ -3,7 +3,7 @@ const { services, extraSteps, configPath, network } = require("./config");
 // TODO: cleanup
 
 const steps = {
-    pull: (path) => `docker pull ${path}:latest`,
+    pull: (path, version='latest') => `docker pull ${path}:${version}`,
     stopContainer: (name) => `docker container stop ${name}`,
     removeContainer: (name) => `docker container rm ${name}`,
     removeImage: (img) => `docker image rm ${img}:current`,
@@ -15,7 +15,9 @@ const steps = {
         }
         return `docker build ${dockerfile} -t ${name}:latest ${path}`;
     },
-    start: (name, bind, path) => `docker run -d --restart=always ${network} --name=${name} -p ${bind} ${path}:current`,
+    start: (name, bind, path, version="current") => `docker run -d --restart=always ${network} --name=${name} -p ${bind} ${path}:${version}`,
+    mountedStart: (name, bind, path, version="current", volume) => 
+        `docker run -d --restart=always ${network} --name=${name} -p ${bind} -v ${volume} ${path}:${version}`,
     syncConfig: (path) => `rsync -a ${configPath} ${path}`,
 }
 
@@ -50,6 +52,14 @@ const generateActions = {
             { cmd: steps.tagImage(name), req: true },
             { cmd: steps.start(name, bind, name), req: true }
         ];
+    },
+    db_hub: ({ name, image, version, bind, volume }) => {
+      return [
+        { cmd: steps.pull(image, version), req: true},
+        { cmd: steps.stopContainer(name), req: false },
+        { cmd: steps.removeContainer(name), req: false },
+        { cmd: steps.mountedStart(name, bind, image, version, volume), req: true }
+      ];  
     }
 }; 
 
